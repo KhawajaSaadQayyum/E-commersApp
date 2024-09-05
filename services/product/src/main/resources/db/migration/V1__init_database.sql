@@ -1,24 +1,22 @@
 -- Create the `category` table with auto-incrementing primary key
-CREATE TABLE IF NOT EXISTS category
-(
-    id          INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    description VARCHAR(255),
-    name        VARCHAR(255)
+CREATE TABLE IF NOT EXISTS category (
+                                        id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                                        description VARCHAR(255),
+                                        name VARCHAR(255)
 );
 # INSERT INTO category (description, name)
 # VALUES ('Electronics items like phones, laptops, etc.', 'Electronics'),
 #        ('Furniture items like tables, chairs, etc.', 'Furniture'),
 #        ('Books and other reading materials.', 'Books');
 -- Create the `product` table with a foreign key to the `category` table and auto-incrementing primary key
-CREATE TABLE IF NOT EXISTS product
-(
-    id                 INT    NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    description        VARCHAR(255),
-    name               VARCHAR(255),
-    available_quantity DOUBLE NOT NULL,
-    price              DECIMAL(38, 2),
-    category_id        INT,
-    CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES category (id)
+CREATE TABLE IF NOT EXISTS product (
+                                       id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                                       available_quantity DOUBLE NOT NULL,
+                                       description VARCHAR(255),
+                                       name VARCHAR(255),
+                                       price DECIMAL(38, 2),
+                                       category_id INT,
+                                       FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
 # INSERT INTO product (description, name, available_quantity, price, category_id)

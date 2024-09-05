@@ -1,62 +1,80 @@
 package com.saad.product.product;
 
-import com.saad.product.product.exception.ProductPurchaseException;
+
+import com.saad.product.exception.ProductPurchaseException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
-@AllArgsConstructor
 //@NoArgsConstructor
 @Service
+@RequiredArgsConstructor
+
 public class ProductService {
     private final ProductRepository repository;
     private final ProductMapper mapper;
 
 
-    public Integer createProduct(@Valid ProductRequest request) {
-
-        var product= mapper.toProduct(request);
+    public Integer createProduct(
+            ProductRequest request
+    ) {
+        var product = mapper.toProduct(request);
         return repository.save(product).getId();
     }
 
-    public List<ProductPurchaseResponse> purchaseProduct(List<ProductPurchaseRequest> request) {
-       var productIds= request.stream().map(ProductPurchaseRequest::productId).toList();
-       var storedProduct = repository.findAllByIdInOrderById(productIds);
-       if(productIds.size()!=storedProduct.size()){
-           throw new ProductPurchaseException();
+    @Transactional(rollbackFor = ProductPurchaseException.class)
+    public List<ProductPurchaseResponse> purchaseProducts(
+            List<ProductPurchaseRequest> request
+    ) {
+        var productIds = request
+                .stream()
+                .map(ProductPurchaseRequest::productId)
+                .toList();
+        var storedProducts = repository.findAllByIdInOrderById(productIds);
+        if (productIds.size() != storedProducts.size()) {
+            throw new ProductPurchaseException("One or more products does not exist");
         }
-       var storesRequest = request.stream().sorted(Comparator.comparing(ProductPurchaseRequest::productId)).toList();
-       var purchasedProducts= new ArrayList<ProductPurchaseResponse>();
-       for(int i=0; i<storedProduct.size(); i++){
-           var product= storedProduct.get(i);
-           var productRequest= storesRequest.get(i);
-           if(product.getAvailableQuantity()< productRequest.quantity()){
-               throw new ProductPurchaseException();
-           }
-           var newAvailableQuantity= product.getAvailableQuantity()-productRequest.quantity();
-           product.setAvailableQuantity(newAvailableQuantity);
-           repository.save(product);
-           purchasedProducts.add(mapper.toProductPurchaseResponse(product,productRequest.quantity()));
-       }
-       return purchasedProducts;
+        var sortedRequest = request
+                .stream()
+                .sorted(Comparator.comparing(ProductPurchaseRequest::productId))
+                .toList();
+        var purchasedProducts = new ArrayList<ProductPurchaseResponse>();
+        for (int i = 0; i < storedProducts.size(); i++) {
+            var product = storedProducts.get(i);
+            var productRequest = sortedRequest.get(i);
+            if (product.getAvailableQuantity() < productRequest.quantity()) {
+                throw new ProductPurchaseException("Insufficient stock quantity for product with ID:: " + productRequest.productId());
+            }
+            var newAvailableQuantity = product.getAvailableQuantity() - productRequest.quantity();
+            product.setAvailableQuantity(newAvailableQuantity);
+            repository.save(product);
+            purchasedProducts.add(mapper.toproductPurchaseResponse(product, productRequest.quantity()));
+        }
+        return purchasedProducts;
     }
 
-    public ProductResponse findById(Integer productId) {
-        return repository.findById(productId)
+    public ProductResponse findById(Integer id) {
+        return repository.findById(id)
                 .map(mapper::toProductResponse)
-                .orElseThrow(()->new EntityNotFoundException("product Not found with the id "+productId));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with ID:: " + id));
     }
+
 
     public List<ProductResponse> findAll() {
-        return repository.findAll().stream().map(mapper::toProductResponse).collect(Collectors.toList());
+        return repository.findAll()
+                .stream()
+                .map(mapper::toProductResponse)
+                .collect(Collectors.toList());
     }
+
 }

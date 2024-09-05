@@ -1,7 +1,7 @@
 package com.saad.product.handler;
 
 //import com.saad.customer.customer.exception.CustomerNotFoundException;
-import com.saad.product.product.exception.ProductPurchaseException;
+import com.saad.product.exception.ProductPurchaseException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -20,20 +20,20 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler (ProductPurchaseException.class)
-    public ResponseEntity<String> handle (ProductPurchaseException exp){
-        return  ResponseEntity
+
+    @ExceptionHandler(ProductPurchaseException.class)
+    public ResponseEntity<String> handle(ProductPurchaseException exp) {
+        return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(exp.getMessage());
     }
 
-    @ExceptionHandler (EntityNotFoundException.class)
-    public ResponseEntity<String> handle (EntityNotFoundException exp){
-        return  ResponseEntity
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<String> handle(EntityNotFoundException exp) {
+        return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(exp.getMessage());
     }
-
 
 
 // Error can be  at this method

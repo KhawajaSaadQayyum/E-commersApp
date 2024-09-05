@@ -18,7 +18,6 @@ public class Customer {
     private String lastname;
     private String email;
     @Embedded
-
     private Address address;
 
 

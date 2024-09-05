@@ -13,8 +13,9 @@ import java.math.BigDecimal;
 @Setter
 @Entity
 public class Product {
+
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Integer id;
     private String name;
     private String description;

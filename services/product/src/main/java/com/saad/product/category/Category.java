@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.List;
 
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -13,11 +14,12 @@ import java.util.List;
 @Setter
 @Entity
 public class Category {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Integer id;
     private String name;
     private String description;
     @OneToMany(mappedBy = "category", cascade = CascadeType.REMOVE)
-    private List<Product> product ;
+    private List<Product> products;
 }

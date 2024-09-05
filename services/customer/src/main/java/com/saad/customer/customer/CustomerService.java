@@ -1,6 +1,6 @@
 package com.saad.customer.customer;
 
-import com.saad.customer.customer.exception.CustomerNotFoundException;
+import com.saad.customer.exception.CustomerNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
@@ -16,60 +16,54 @@ import static java.lang.String.format;
 
 public class CustomerService {
 
-    private final customerRepositry repositry;
+    private final CustomerRepository repository;
     private final CustomerMapper mapper;
 
 
     public Integer createCustomer(CustomerRequest request) {
-        var customer = repositry.save(mapper.toCustomer(request));
+        var customer = repository.save(mapper.toCustomer(request));
         return customer.getId();
     }
-
-    public void updateCustomer(@Valid CustomerRequest request) {
-        var customer = repositry.findById(request.id())
-                .orElseThrow(()-> new CustomerNotFoundException(
-                      format("Cannot Update Customer:: no customer found %s",request.id())
+    public void updateCustomer(CustomerRequest request) {
+        var customer = this.repository.findById(request.id())
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        String.format("Cannot update customer:: No customer found with the provided ID: %s", request.id())
                 ));
         mergeCustomer(customer, request);
-        repositry.save(customer);
+        this.repository.save(customer);
     }
 
-    private void mergeCustomer(Customer customer, @Valid CustomerRequest request) {
-
-        if(StringUtils.isNotBlank(request.firstname())){
+    private void mergeCustomer(Customer customer, CustomerRequest request) {
+        if (StringUtils.isNotBlank(request.firstname())) {
             customer.setFirstname(request.firstname());
         }
-        if(StringUtils.isNotBlank(request.lastname())){
-            customer.setFirstname(request.lastname());
+        if (StringUtils.isNotBlank(request.email())) {
+            customer.setEmail(request.email());
         }
-        if(StringUtils.isNotBlank(request.email())){
-            customer.setFirstname(request.email());
-        }
-        if(request.address()!=null){
+        if (request.address() != null) {
             customer.setAddress(request.address());
         }
     }
 
     public List<CustomerResponse> findAllCustomers() {
-        return repositry.findAll()
+        return  this.repository.findAll()
                 .stream()
-                .map(mapper::fromCustomer)
+                .map(this.mapper::fromCustomer)
                 .collect(Collectors.toList());
-
     }
 
-    public boolean existsById(String customerId) {
-        return repositry.findById(Integer.valueOf(customerId))
+    public boolean existsById(Integer id) {
+        return this.repository.findById(id)
                 .isPresent();
     }
 
-    public CustomerResponse findById(String customerId) {
-        return repositry.findById(Integer.valueOf(customerId))
-                .map(mapper::fromCustomer)
-                .orElseThrow(() -> new CustomerNotFoundException(format("No Customer Found with this Id %s",customerId)));
-    }
 
-    public void deleteCustomer(String customerId) {
-        repositry.deleteById(Integer.valueOf(customerId));
+    public CustomerResponse findById(Integer id) {
+        return this.repository.findById(id)
+                .map(mapper::fromCustomer)
+                .orElseThrow(() -> new CustomerNotFoundException(String.format("No customer found with the provided ID: %s", id)));
+    }
+    public void deleteCustomer(Integer id) {
+        this.repository.deleteById(id);
     }
 }

@@ -3,12 +3,18 @@ server:
 
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/mydatabase
     username: root
     password: saad4110
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: update
-    database: mysql
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+#    database: mysql
+#    database-platform: org.hibernate.dialect.MySQL8Dialect
